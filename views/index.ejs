@@ -1,0 +1,42 @@
+<% title = 'Home' %>
+<%- include('partials/header') %>
+
+  <section class="hero">
+    <span class="eyebrow">Starter project</span>
+    <h1>A small, working login system.</h1>
+    <p class="lead">
+      This is a minimal Node.js app that shows the full loop: a sign up
+      form that creates an account, a login form that checks your email
+      and password, and a database that remembers your account in between
+      visits.
+    </p>
+
+    <% if (userEmail) { %>
+      <div class="hero-actions">
+        <a href="/dashboard" class="btn btn--primary">Go to your dashboard</a>
+      </div>
+      <p class="muted">You're logged in as <strong><%= userEmail %></strong>.</p>
+    <% } else { %>
+      <div class="hero-actions">
+        <a href="/signup" class="btn btn--primary">Create an account</a>
+        <a href="/login" class="btn btn--ghost">Log in</a>
+      </div>
+    <% } %>
+  </section>
+
+  <section class="features">
+    <div class="feature-card">
+      <h3>Email &amp; password</h3>
+      <p>Accounts are identified by email. Passwords are hashed with bcrypt before they're stored.</p>
+    </div>
+    <div class="feature-card">
+      <h3>SQLite database</h3>
+      <p>User accounts are saved in a local <code>database.sqlite</code> file — no separate database server needed.</p>
+    </div>
+    <div class="feature-card">
+      <h3>Sessions</h3>
+      <p>After logging in, a session cookie keeps you signed in as you move between pages.</p>
+    </div>
+  </section>
+
+<%- include('partials/footer') %>

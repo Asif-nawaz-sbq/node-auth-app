@@ -1,0 +1,23 @@
+<% title = 'Dashboard' %>
+<%- include('partials/header') %>
+
+  <section class="auth">
+    <div class="auth-card">
+      <h1>Welcome</h1>
+      <p class="muted">You're logged in.</p>
+
+      <dl class="account-details">
+        <dt>Email</dt>
+        <dd><%= user.email %></dd>
+
+        <dt>Account created</dt>
+        <dd><%= new Date(user.created_at).toLocaleString() %></dd>
+      </dl>
+
+      <form action="/logout" method="POST">
+        <button type="submit" class="btn btn--ghost btn--block">Log out</button>
+      </form>
+    </div>
+  </section>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %> · Nodeauth</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <a href="/" class="logo">
+      <span class="logo-mark">N</span>
+      <span>Nodeauth</span>
+    </a>
+    <nav class="topnav">
+      <% if (userEmail) { %>
+        <span class="topnav-user"><%= userEmail %></span>
+        <a href="/dashboard" class="nav-link">Dashboard</a>
+        <form action="/logout" method="POST" class="inline-form">
+          <button type="submit" class="nav-link nav-link--button">Log out</button>
+        </form>
+      <% } else { %>
+        <a href="/login" class="nav-link">Log in</a>
+        <a href="/signup" class="nav-link nav-link--primary">Sign up</a>
+      <% } %>
+    </nav>
+  </header>
+  <main class="page">
