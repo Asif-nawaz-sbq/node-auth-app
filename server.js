@@ -14,6 +14,7 @@ const express = require('express');
 const session = require('express-session');
 const bcrypt = require('bcryptjs');
 const path = require('path');
+require('dotenv').config();
 const db = require('./db');
 
 const app = express();
@@ -64,7 +65,7 @@ app.get('/signup', (req, res) => {
 });
 
 // Sign up - handle form submission
-app.post('/signup', (req, res) => {
+app.post('/signup', async (req, res) => {
   const email = (req.body.email || '').trim().toLowerCase();
   const password = req.body.password || '';
   const confirmPassword = req.body.confirmPassword || '';
@@ -88,19 +89,17 @@ app.post('/signup', (req, res) => {
   }
 
   // Check if the email is already registered
-  const existingUser = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
+  const existingUser = await db.get('SELECT id FROM users WHERE email = ?', [email]);
   if (existingUser) {
     return res.render('signup', { error: 'An account with that email already exists.', email });
   }
 
   // Hash the password and save the new user
   const passwordHash = bcrypt.hashSync(password, 10);
-  const result = db
-    .prepare('INSERT INTO users (email, password) VALUES (?, ?)')
-    .run(email, passwordHash);
+  const result = await db.run('INSERT INTO users (email, password) VALUES (?, ?)', [email, passwordHash]);
 
   // Log the new user in automatically
-  req.session.userId = result.lastInsertRowid;
+  req.session.userId = result.insertId;
   req.session.userEmail = email;
 
   res.redirect('/dashboard');
@@ -113,7 +112,7 @@ app.get('/login', (req, res) => {
 });
 
 // Login - handle form submission
-app.post('/login', (req, res) => {
+app.post('/login', async (req, res) => {
   const email = (req.body.email || '').trim().toLowerCase();
   const password = req.body.password || '';
 
@@ -121,7 +120,7 @@ app.post('/login', (req, res) => {
     return res.render('login', { error: 'Please enter your email and password.', email });
   }
 
-  const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
+  const user = await db.get('SELECT * FROM users WHERE email = ?', [email]);
 
   // Use the same error message whether the email or password is wrong,
   // so we don't reveal which emails are registered.
@@ -136,10 +135,9 @@ app.post('/login', (req, res) => {
 });
 
 // Dashboard - only for logged-in users
-app.get('/dashboard', requireLogin, (req, res) => {
-  const user = db
-    .prepare('SELECT email, created_at FROM users WHERE id = ?')
-    .get(req.session.userId);
+app.get('/dashboard', requireLogin, async (req, res) => {
+  const user = await db
+    .get('SELECT email, created_at FROM users WHERE id = ?', [req.session.userId]);
 
   res.render('dashboard', { user });
 });

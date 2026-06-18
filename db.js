@@ -1,21 +1,50 @@
 // db.js
-// Sets up a small SQLite database with a single "users" table.
-// SQLite stores everything in one file (database.sqlite) - no separate
-// database server needed, which keeps this project easy to run.
+// Uses MySQL (mysql2) and reads connection values from environment variables.
+// Exports small helpers: `query`, `get`, and `run` for simple use in routes.
 
-const Database = require('better-sqlite3');
-const path = require('path');
+require('dotenv').config();
+const mysql = require('mysql2/promise');
 
-const db = new Database(path.join(__dirname, 'database.sqlite'));
+const pool = mysql.createPool({
+  host: process.env.DB_HOST || 'localhost',
+  port: process.env.DB_PORT ? Number(process.env.DB_PORT) : 3306,
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD || '',
+  database: process.env.DB_NAME || 'node_auth_app',
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
+});
 
-// Create the users table the first time the app runs.
-db.exec(`
-  CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    email TEXT UNIQUE NOT NULL,
-    password TEXT NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-  )
-`);
+// Ensure the `users` table exists
+async function ensureTables() {
+  const create = `
+    CREATE TABLE IF NOT EXISTS users (
+      id INT PRIMARY KEY AUTO_INCREMENT,
+      email VARCHAR(255) UNIQUE NOT NULL,
+      password VARCHAR(255) NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB;
+  `;
+  await pool.query(create);
+}
 
-module.exports = db;
+// Run table creation immediately (fire-and-forget, but log errors)
+ensureTables().catch(err => {
+  console.error('Error ensuring DB tables:', err);
+});
+
+module.exports = {
+  query: async (sql, params) => {
+    const [rows] = await pool.query(sql, params);
+    return rows;
+  },
+  get: async (sql, params) => {
+    const [rows] = await pool.query(sql, params);
+    return rows[0] || null;
+  },
+  run: async (sql, params) => {
+    const [result] = await pool.query(sql, params);
+    return result; // contains insertId, affectedRows, etc.
+  }
+};
