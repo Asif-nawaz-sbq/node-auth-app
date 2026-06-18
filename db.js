@@ -1,7 +1,7 @@
 const mysql = require('mysql2');
 
 const db = mysql.createConnection({
-  host: 'database-1.ct20am40o9pn.us-east-1.rds.amazonaws.com',
+  host: 'database-1.c5y6og6c4mwx.us-east-1.rds.amazonaws.com',
   user: 'admin',
   password: 'YOUR_PASSWORD',
   database: 'nodeauthapp',
