@@ -31,11 +31,11 @@ function buildSslOptions() {
 const sslOptions = buildSslOptions();
 
 const pool = mysql.createPool({
-  host: process.env.DB_HOST || 'localhost',
-  port: process.env.DB_PORT ? Number(process.env.DB_PORT) : 3306,
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || '',
-  database: process.env.DB_NAME || 'node_auth_app',
+  host: process.env.DB_HOST ? process.env.DB_HOST.trim() : 'localhost',
+  port: process.env.DB_PORT ? Number(process.env.DB_PORT.trim()) : 3306,
+  user: process.env.DB_USER ? process.env.DB_USER.trim() : 'root',
+  password: process.env.DB_PASSWORD ? process.env.DB_PASSWORD.trim() : '',
+  database: process.env.DB_NAME ? process.env.DB_NAME.trim() : 'node_auth_app',
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,

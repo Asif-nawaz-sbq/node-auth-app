@@ -6,11 +6,11 @@ require('dotenv').config();
 const mysql = require('mysql2/promise');
 const fs = require('fs');
 
-const host = process.env.DB_HOST || 'localhost';
-const port = process.env.DB_PORT ? Number(process.env.DB_PORT) : 3306;
-const user = process.env.DB_USER || 'root';
-const password = process.env.DB_PASSWORD || '';
-const dbName = process.env.DB_NAME || 'node_auth_app_db';
+const host = process.env.DB_HOST ? process.env.DB_HOST.trim() : 'localhost';
+const port = process.env.DB_PORT ? Number(process.env.DB_PORT.trim()) : 3306;
+const user = process.env.DB_USER ? process.env.DB_USER.trim() : 'root';
+const password = process.env.DB_PASSWORD ? process.env.DB_PASSWORD.trim() : '';
+const dbName = process.env.DB_NAME ? process.env.DB_NAME.trim() : 'node_auth_app_db';
 
 function buildSsl() {
   if (!process.env.DB_SSL) return undefined;
