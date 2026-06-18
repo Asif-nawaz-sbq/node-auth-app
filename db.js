@@ -4,6 +4,31 @@
 
 require('dotenv').config();
 const mysql = require('mysql2/promise');
+const fs = require('fs');
+
+function buildSslOptions() {
+  if (!process.env.DB_SSL) return undefined;
+  // If DB_SSL is set (truthy), attempt to load any provided cert files.
+  const ssl = {};
+  if (process.env.DB_SSL_CA_PATH && fs.existsSync(process.env.DB_SSL_CA_PATH)) {
+    ssl.ca = fs.readFileSync(process.env.DB_SSL_CA_PATH, 'utf8');
+  }
+  if (process.env.DB_SSL_CERT_PATH && fs.existsSync(process.env.DB_SSL_CERT_PATH)) {
+    ssl.cert = fs.readFileSync(process.env.DB_SSL_CERT_PATH, 'utf8');
+  }
+  if (process.env.DB_SSL_KEY_PATH && fs.existsSync(process.env.DB_SSL_KEY_PATH)) {
+    ssl.key = fs.readFileSync(process.env.DB_SSL_KEY_PATH, 'utf8');
+  }
+  if (process.env.DB_SSL_REJECT_UNAUTHORIZED === 'false') {
+    ssl.rejectUnauthorized = false;
+  }
+
+  // If no files were provided but DB_SSL is truthy, return true to request SSL.
+  if (Object.keys(ssl).length === 0) return true;
+  return ssl;
+}
+
+const sslOptions = buildSslOptions();
 
 const pool = mysql.createPool({
   host: process.env.DB_HOST || 'localhost',
@@ -13,7 +38,8 @@ const pool = mysql.createPool({
   database: process.env.DB_NAME || 'node_auth_app',
   waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0
+  queueLimit: 0,
+  ...(sslOptions ? { ssl: sslOptions } : {})
 });
 
 // Ensure the `users` table exists
